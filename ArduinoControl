@@ -1,0 +1,54 @@
+int thermistorPin = A0;
+int Vout;
+int limit = 45; // upper temperature limit
+float R1 = 10000; // value of resistance on board
+float logR2, R2, T; // R2: resistance of thermistor, T: temperature in Celsius
+float c1 = 0.001129148, c2 = 0.000234125, c3 = 0.0000000876741; // Steinart-Hart coefficients
+
+int DC1 = 7;
+int DC2 = 5;
+
+void setup() {
+  pinMode(DC1, OUTPUT);
+  pinMode(DC2, OUTPUT);
+  Serial.begin(9600);
+}
+
+void loop() {
+
+  Vout = analogRead(thermistorPin);
+  R2 = R1 * (1023.0 / (float)Vout - 1.0); // calculate resistance of thermistor
+  logR2 = log(R2);
+  T = (1.0 / (c1 + c2 * logR2 + c3 * logR2 * logR2 * logR2)); // temperature in Kelvin
+  T = T - 273.15; // convert Kelvin to Celsius
+
+  if (T > limit) {
+    Serial.print("Temperature above limit. Shutting down.");
+    digitalWrite(DC1, LOW);
+    digitalWrite(DC2, LOW);
+    exit(0);  // exit loop if temperature above limit
+  }
+
+  Serial.print("Temperature: ");
+  Serial.print(T);
+  Serial.println(" C");
+
+  if(Serial.available() > 0){
+    float receivedT = Serial.parseFloat();
+
+    if(receivedT > T){
+      digitalWrite(DC1, HIGH);
+      digitalWrite(DC2, LOW);
+    }
+    else if(receivedT < T){
+      digitalWrite(DC1, LOW);
+      digitalWrite(DC2, HIGH);
+    }
+    else{
+      digitalWrite(DC1, LOW);
+      digitalWrite(DC2, LOW);
+    }
+  }
+
+  delay(500);
+}
