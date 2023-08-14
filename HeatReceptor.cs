@@ -68,7 +68,12 @@ public class HeatReceptor : MonoBehaviour
         }
 
         // Update the temperature display on the TextMeshPro object.
-        temperatureText.text = currentTemperature.ToString() + "¡ÆC";
+        temperatureText.text = currentTemperature.ToString() + "Â°C";
+    }
+
+    public float GetCurrentTemperature()
+    {
+        return currentTemperature;
     }
 
     // Calculate radiative heat transfer between the heat source and receptor using the Stefan-Boltzmann law.
